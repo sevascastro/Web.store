@@ -78,7 +78,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    #currencyBtn {
+    #currencyBtn, #checkoutBtn {
       display: block;
       margin: 15px auto;
       padding: 10px 20px;
@@ -89,7 +89,7 @@
       font-weight: bold;
       cursor: pointer;
     }
-    #currencyBtn:hover {
+    #currencyBtn:hover, #checkoutBtn:hover {
       background: #cc8800;
     }
   </style>
@@ -103,10 +103,12 @@
     <h2>🛍️ Carrito</h2>
     <ul id="cartItems"></ul>
     <p><strong>Total:</strong> <span id="total">0 USD</span></p>
+    <button id="checkoutBtn">✅ Finalizar compra en WhatsApp</button>
   </div>
 
   <script>
     const API_KEY = "cur_live_5EczRyG7c6S0COsoFToUPFluwJvBif7qzcRiPJVx";
+    const WHATSAPP_NUMBER = "573142369516";
 
     const products = [
       {
@@ -201,7 +203,23 @@
       }
     }
 
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Tu carrito está vacío.");
+        return;
+      }
+      let message = "🛒 Hola, quiero adquirir:\n";
+      cart.forEach(item => {
+        message += `- ${item.name} (${Math.round(item.price * rate)} ${currentCurrency})\n`;
+      });
+      const total = cart.reduce((sum, item) => sum + item.price * rate, 0);
+      message += `\n💵 Total: ${Math.round(total)} ${currentCurrency}`;
+      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      window.open(url, "_blank");
+    }
+
     document.getElementById("currencyBtn").addEventListener("click", convertPrices);
+    document.getElementById("checkoutBtn").addEventListener("click", checkout);
 
     renderProducts();
     renderCart();
