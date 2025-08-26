@@ -1,276 +1,239 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>pouleSTORE</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 { text-align: center; color: #00ffff; }
-    #visitorCounter { text-align: center; margin-top: 10px; font-size: 16px; color: #ffaa00; }
-    #products { margin-top: 20px; }
-    .category { margin-bottom: 40px; }
-    .category h2 { color: #ffaa00; margin-bottom: 15px; }
-    .productGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    .product { background: #1a1a1a; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #00ffff55; }
-    .product h3 { color: #00ff41; margin: 5px 0; }
-    .prices p { color: #ccc; margin: 8px 0; }
-    .prices button { background: #00ffff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-top: 5px; color: #000; font-weight: bold; transition: 0.3s ease; }
-    .prices button:hover { background: #00cccc; }
-    .product iframe { margin-top: 10px; border-radius: 8px; width: 100%; height: 200px; }
+<html lang="es">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>pouleSTORE</title>  
+  <style>  
+    body { font-family: Arial, sans-serif; background: #0f0f0f; color: #fff; margin: 0; padding: 20px; }  
+    h1 { text-align: center; color: #00ffff; }  
+    #visitorCounter { text-align: center; margin-top: 10px; font-size: 16px; color: #ffaa00; }  
+    #products { margin-top: 20px; }  
+    .category { margin-bottom: 40px; }  
+    .category h2 { color: #ffaa00; margin-bottom: 15px; }  
+    .productGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }  
+    .product { background: #1a1a1a; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #00ffff55; }  
+    .product h3 { color: #00ff41; margin: 5px 0; }  
+    .prices p { color: #ccc; margin: 8px 0; }  
+    .prices button { background: #00ffff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; margin-top: 5px; color: #000; font-weight: bold; transition: 0.3s ease; }  
+    .prices button:hover { background: #00cccc; }  
+    .product iframe { margin-top: 10px; border-radius: 8px; width: 100%; height: 200px; }  
 
-    /* 🛒 Carrito flotante */
-    #cartBubble, #reviewsBubble {
-      position: fixed;
-      bottom: 20px;
-      background: #ffaa00;
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-      z-index: 1000;
-    }
-    #cartBubble { right: 20px; }
-    #reviewsBubble { right: 90px; background:#00ffff; }
+    /* 🛒 Carrito flotante */  
+    #cartBubble { position: fixed; bottom: 20px; right: 20px; background: #ffaa00; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); z-index: 1000; }  
+    #cart { position: fixed; bottom: 100px; right: 20px; background: #222; padding: 15px; border-radius: 12px; width: 300px; display: none; z-index: 999; }  
+    #cart ul { list-style: none; padding: 0; }  
+    #cart li { margin: 5px 0; font-size: 14px; }  
+    #cart li button { margin-left: 10px; background: red; color: #fff; border: none; border-radius: 5px; cursor: pointer; padding: 2px 6px; font-size: 12px; }  
+    #checkout { background: #25d366; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-top: 10px; color: #000; font-weight: bold; width: 100%; }  
+    #checkout:hover { background: #1da851; }  
+    #currencyBtn { display: block; margin: 15px auto; padding: 10px 20px; background: #ffaa00; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }  
+    #currencyBtn:hover { background: #cc8800; }  
 
-    #cart, #reviewsPanel {
-      position: fixed;
-      bottom: 100px; right: 20px;
-      background: #222; padding: 15px; border-radius: 12px;
-      width: 300px; display: none; z-index: 999;
-      max-height: 400px; overflow-y: auto;
-    }
+    /* ⭐ Reseñas */  
+    #reviews { margin-top: 50px; background: #1a1a1a; padding: 20px; border-radius: 12px; }  
+    #reviews h2 { color: #ffaa00; margin-bottom: 15px; }  
+    #reviewList { list-style: none; padding: 0; }  
+    #reviewList li { margin-bottom: 10px; padding: 10px; border-radius: 8px; background: #2a2a2a; }  
+    #reviewList strong { color: #00ffff; }  
+    #reviewForm input, #reviewForm textarea { width: 100%; padding: 8px; margin: 6px 0; border-radius: 6px; border: none; }  
+    #reviewForm button { background: #00ff41; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; color: #000; font-weight: bold; margin-top: 8px; }  
+    #reviewForm button:hover { background: #00cc33; }  
+  </style>  
+</head>  
+<body>  
+  <h1>🛒 pouleSTORE</h1>  
+  <p id="visitorCounter">👥 Visitantes: cargando...</p>  
+  <button id="currencyBtn">🌍 Convertir precios a mi moneda</button>  
+  <div id="products"></div>  
 
-    #cart ul, #reviewsList { list-style: none; padding: 0; }
-    #cart li { margin: 5px 0; font-size: 14px; }
-    #cart li button { margin-left: 10px; background: red; color: #fff; border: none; border-radius: 5px; cursor: pointer; padding: 2px 6px; font-size: 12px; }
-    #checkout { background: #25d366; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-top: 10px; color: #000; font-weight: bold; width: 100%; }
-    #checkout:hover { background: #1da851; }
-    #currencyBtn { display: block; margin: 15px auto; padding: 10px 20px; background: #ffaa00; color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    #currencyBtn:hover { background: #cc8800; }
+  <!-- 🛒 Burbuja flotante -->  
+  <div id="cartBubble">🛒</div>  
+  <!-- Carrito oculto -->  
+  <div id="cart">  
+    <h2>🛍️ Carrito</h2>  
+    <ul id="cartItems"></ul>  
+    <p><strong>Total:</strong> <span id="total">0 USD</span></p>  
+    <button id="checkout">Comprar por WhatsApp</button>  
+  </div>  
 
-    /* ✨ mensaje animado */
-    #reviewMessage {
-      position: fixed; bottom: 90px; left: 20px;
-      background: #ffaa00; color:#000;
-      padding: 10px 15px; border-radius: 8px;
-      display: none; z-index: 1001;
-    }
-  </style>
-</head>
-<body>
-  <h1>🛒 pouleSTORE</h1>
-  <p id="visitorCounter">👥 Visitantes: cargando...</p>
-  <button id="currencyBtn">🌍 Convertir precios a mi moneda</button>
-  <div id="products"></div>
+  <!-- ⭐ Sección de reseñas -->  
+  <div id="reviews">  
+    <h2>⭐ Reseñas de clientes</h2>  
+    <ul id="reviewList"></ul>  
+    <form id="reviewForm">  
+      <input type="text" id="name" placeholder="Tu nombre" required />  
+      <textarea id="message" placeholder="Escribe tu reseña..." required></textarea>  
+      <button type="submit">Enviar reseña</button>  
+    </form>  
+  </div>  
 
-  <!-- 🛒 Burbuja flotante -->
-  <div id="cartBubble">🛒</div>
-  <!-- ⭐ Estrellita reseñas -->
-  <div id="reviewsBubble">⭐</div>
+  <script type="module">  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";  
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";  
 
-  <!-- Carrito -->
-  <div id="cart">
-    <h2>🛍️ Carrito</h2>
-    <ul id="cartItems"></ul>
-    <p><strong>Total:</strong> <span id="total">0 USD</span></p>
-    <button id="checkout">Comprar por WhatsApp</button>
-  </div>
+    const firebaseConfig = {  
+      apiKey: "AIzaSyCl8HLbXY-QML1QXLjG1Q2KRM9LHXcNNbg",  
+      authDomain: "poulestore-6867c.firebaseapp.com",  
+      projectId: "poulestore-6867c",  
+      storageBucket: "poulestore-6867c.firebasestorage.app",  
+      messagingSenderId: "682539455505",  
+      appId: "1:682539455505:web:ab19d2f1551ed130ed0db0"  
+    };  
 
-  <!-- Panel reseñas -->
-  <div id="reviewsPanel">
-    <h2>⭐ Reseñas</h2>
-    <ul id="reviewsList"></ul>
-    <div id="reviewForm"></div>
-  </div>
+    const app = initializeApp(firebaseConfig);  
+    const db = getFirestore(app);  
+    const counterRef = doc(db, "estadisticas", "visitas");  
 
-  <!-- Mensaje animado -->
-  <div id="reviewMessage">💬 Deja tu reseña</div>
+    async function addVisit() {  
+      const snap = await getDoc(counterRef);  
+      if (!snap.exists()) { await setDoc(counterRef, { total: 1 }); }  
+      else { await updateDoc(counterRef, { total: increment(1) }); }  
+    }  
+    onSnapshot(counterRef, (docSnap) => {  
+      if (docSnap.exists()) {  
+        document.getElementById("visitorCounter").textContent = "👥 Visitantes: " + docSnap.data().total;  
+      }  
+    });  
+    addVisit();  
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, collection, addDoc, query, orderBy, onSnapshot as onSnapCol } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    // ============================  
+    // 🛒 CATEGORÍAS Y PRODUCTOS  
+    // ============================  
+    const categories = [  
+      { name: "📱 Android", items: [  
+        { name: "Drip Client", video: "https://www.youtube.com/embed/aawpMA3HAUU", options: [ { price: 3, duration: "1 DÍA ⏳" }, { price: 8, duration: "10 DÍAS 🔥" }, { price: 15, duration: "20 DÍAS 🚀" } ] },  
+        { name: "Cuban No Root", video: "https://www.youtube.com/embed/1k-8Ue8xcMk", options: [ { price: 8, duration: "10 DÍAS ⚔️" }, { price: 13, duration: "20 DÍAS 🛡️" }, { price: 20, duration: "30 DÍAS 🔰" }, { price: 40, duration: "PERMANENTE 👑♾️" } ] }  
+      ] },  
+      { name: "🍏 iOS", items: [] },  
+      { name: "💻 PC", items: [] }  
+    ];  
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCl8HLbXY-QML1QXLjG1Q2KRM9LHXcNNbg",
-      authDomain: "poulestore-6867c.firebaseapp.com",
-      projectId: "poulestore-6867c",
-      storageBucket: "poulestore-6867c.firebasestorage.app",
-      messagingSenderId: "682539455505",
-      appId: "1:682539455505:web:ab19d2f1551ed130ed0db0"
-    };
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];  
+    let currentCurrency = "USD";  
+    let rate = 1;  
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    function renderProducts() {  
+      const container = document.getElementById("products");  
+      container.innerHTML = "";  
+      categories.forEach(cat => {  
+        let catHtml = `<div class="category"><h2>${cat.name}</h2><div class="productGrid">`;  
+        cat.items.forEach((p, i) => {  
+          let optionsHtml = "";  
+          p.options.forEach((opt, j) => {  
+            const convertedPrice = Math.round(opt.price * rate);  
+            optionsHtml += `<p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} <button onclick="addToCart('${cat.name}', ${i}, ${j})">Añadir</button></p>`;  
+          });  
+          catHtml += `<div class="product"><h3>${p.name}</h3><div class="prices">${optionsHtml}</div>${p.video ? `<iframe src="${p.video}" frameborder="0" allowfullscreen></iframe>` : ""}</div>`;  
+        });  
+        catHtml += "</div></div>";  
+        container.innerHTML += catHtml;  
+      });  
+    }  
 
-    // ================== VISITAS ==================
-    const counterRef = doc(db, "estadisticas", "visitas");
-    async function addVisit() {
-      const snap = await getDoc(counterRef);
-      if (!snap.exists()) { await setDoc(counterRef, { total: 1 }); }
-      else { await updateDoc(counterRef, { total: increment(1) }); }
-    }
-    onSnapshot(counterRef, (docSnap) => {
-      if (docSnap.exists()) {
-        document.getElementById("visitorCounter").textContent =
-          "👥 Visitantes: " + docSnap.data().total;
-      }
-    });
-    addVisit();
+    function renderCart() {  
+      const cartItems = document.getElementById("cartItems");  
+      const total = document.getElementById("total");  
+      cartItems.innerHTML = "";  
+      let sum = 0;  
+      cart.forEach((item, i) => {  
+        sum += item.price * rate;  
+        cartItems.innerHTML += `<li>${item.name} - ${Math.round(item.price * rate)} ${currentCurrency} <button onclick="removeFromCart(${i})">❌</button></li>`;  
+      });  
+      total.textContent = Math.round(sum) + " " + currentCurrency;  
+      localStorage.setItem("cart", JSON.stringify(cart));  
+    }  
 
-    // ================== PRODUCTOS ==================
-    const categories = [
-      { name: "📱 Android",
-        items: [
-          { name: "Drip Client", video: "https://www.youtube.com/embed/aawpMA3HAUU",
-            options: [{ price: 3, duration: "1 DÍA ⏳" },{ price: 8, duration: "10 DÍAS 🔥" },{ price: 15, duration: "20 DÍAS 🚀" }] },
-          { name: "Cuban No Root", video: "https://www.youtube.com/embed/1k-8Ue8xcMk",
-            options: [{ price: 8, duration: "10 DÍAS ⚔️" },{ price: 13, duration: "20 DÍAS 🛡️" },{ price: 20, duration: "30 DÍAS 🔰" },{ price: 40, duration: "PERMANENTE 👑♾️" }] }
-        ]},
-      { name: "🍏 iOS", items: [] },
-      { name: "💻 PC", items: [] }
-    ];
+    window.addToCart = function(categoryName, productIndex, optionIndex) {  
+      const category = categories.find(c => c.name === categoryName);  
+      const product = category.items[productIndex];  
+      const option = product.options[optionIndex];  
+      cart.push({ name: `${product.name} (${option.duration})`, price: option.price });  
+      renderCart();  
+    };  
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let currentCurrency = "USD", rate = 1;
+    window.removeFromCart = function(i) { cart.splice(i, 1); renderCart(); };  
 
-    function renderProducts() {
-      const container = document.getElementById("products");
-      container.innerHTML = "";
-      categories.forEach(cat => {
-        let catHtml = `<div class="category"><h2>${cat.name}</h2><div class="productGrid">`;
-        cat.items.forEach((p, i) => {
-          let optionsHtml = "";
-          p.options.forEach((opt, j) => {
-            const convertedPrice = Math.round(opt.price * rate);
-            optionsHtml += `<p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} <button onclick="addToCart('${cat.name}', ${i}, ${j})">Añadir</button></p>`;
-          });
-          catHtml += `<div class="product"><h3>${p.name}</h3><div class="prices">${optionsHtml}</div>${p.video ? `<iframe src="${p.video}" frameborder="0" allowfullscreen></iframe>` : ""}</div>`;
-        });
-        catHtml += "</div></div>";
-        container.innerHTML += catHtml;
-      });
-    }
+    async function convertPrices() {  
+      try {  
+        const locRes = await fetch("https://ipapi.co/json/");  
+        const locData = await locRes.json();  
+        currentCurrency = locData.currency || "USD";  
+        const rateRes = await fetch(`https://open.er-api.com/v6/latest/USD`);  
+        const rateData = await rateRes.json();  
+        rate = rateData.rates[currentCurrency] || 1;  
+        renderProducts();  
+        renderCart();  
+        alert(`Precios convertidos a ${currentCurrency} (${locData.country_name})`);  
+      } catch (e) { alert("Error al convertir moneda. Intenta de nuevo."); }  
+    }  
 
-    function renderCart() {
-      const cartItems = document.getElementById("cartItems");
-      const total = document.getElementById("total");
-      cartItems.innerHTML = "";
-      let sum = 0;
-      cart.forEach((item, i) => {
-        sum += item.price * rate;
-        cartItems.innerHTML += `<li>${item.name} - ${Math.round(item.price * rate)} ${currentCurrency} <button onclick="removeFromCart(${i})">❌</button></li>`;
-      });
-      total.textContent = Math.round(sum) + " " + currentCurrency;
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
+    document.getElementById("cartBubble").addEventListener("click", () => {  
+      const cartBox = document.getElementById("cart");  
+      cartBox.style.display = cartBox.style.display === "block" ? "none" : "block";  
+    });  
 
-    window.addToCart = function(categoryName, productIndex, optionIndex) {
-      const category = categories.find(c => c.name === categoryName);
-      const product = category.items[productIndex];
-      const option = product.options[optionIndex];
-      cart.push({ name: `${product.name} (${option.duration})`, price: option.price });
-      renderCart();
-    };
+    document.getElementById("checkout").addEventListener("click", () => {  
+      if (cart.length === 0) { alert("Tu carrito está vacío."); return; }  
+      let message = "📦 Hola, quiero comprar:\n";  
+      cart.forEach(item => { message += `- ${item.name} (${item.price} USD)\n`; });  
+      const url = `https://wa.me/573142369516?text=${encodeURIComponent(message)}`;  
+      window.open(url, "_blank");  
+    });  
 
-    window.removeFromCart = function(i) {
-      cart.splice(i, 1); renderCart();
-    };
+    document.getElementById("currencyBtn").addEventListener("click", convertPrices);  
 
-    async function convertPrices() {
-      try {
-        const locRes = await fetch("https://ipapi.co/json/"); const locData = await locRes.json();
-        currentCurrency = locData.currency || "USD";
-        const rateRes = await fetch(`https://open.er-api.com/v6/latest/USD`); const rateData = await rateRes.json();
-        rate = rateData.rates[currentCurrency] || 1;
-        renderProducts(); renderCart();
-        alert(`Precios convertidos a ${currentCurrency} (${locData.country_name})`);
-      } catch (e) { alert("Error al convertir moneda."); }
-    }
+    renderProducts();  
+    renderCart();  
 
-    document.getElementById("cartBubble").addEventListener("click", () => {
-      const box = document.getElementById("cart");
-      box.style.display = box.style.display === "block" ? "none" : "block";
-    });
-    document.getElementById("checkout").addEventListener("click", () => {
-      if (cart.length === 0) { alert("Tu carrito está vacío."); return; }
-      let message = "📦 Hola, quiero comprar:\n"; cart.forEach(item => { message += `- ${item.name} (${item.price} USD)\n`; });
-      window.open(`https://wa.me/573142369516?text=${encodeURIComponent(message)}`, "_blank");
-    });
-    document.getElementById("currencyBtn").addEventListener("click", convertPrices);
-    renderProducts(); renderCart();
+    // ============================  
+    // ⭐ SISTEMA DE RESEÑAS NUEVO  
+    // ============================  
+    const reviewList = document.getElementById("reviewList");  
+    const reviewForm = document.getElementById("reviewForm");  
+    const reviewsRef = collection(db, "reseñas");  
 
-    // ================== ⭐ Reseñas ==================
-    const reviewsRef = collection(db, "reseñas");
+    // Reseñas falsas (máx 10)  
+    const fakeReviews = [  
+      { name: "Carlos", message: "Excelente servicio y rápido 🚀" },  
+      { name: "Laura", message: "Muy confiable, 100% recomendado 💯" },  
+      { name: "Marta", message: "Todo llegó en minutos 🔥" },  
+      { name: "Juan", message: "Atención de primera 👌" },  
+      { name: "Pedro", message: "Los mejores precios que he visto 💵" },  
+      { name: "Ana", message: "Me resolvieron al instante 🙌" },  
+      { name: "Diego", message: "Siempre compro aquí, full confianza 🛒" },  
+      { name: "Sofía", message: "Super recomendado, volveré 💖" },  
+      { name: "Luis", message: "Muy rápido y seguro 🔒" },  
+      { name: "Camila", message: "10/10 servicio ⭐" }  
+    ];  
 
-    // login localStorage
-    function getUser() { return JSON.parse(localStorage.getItem("user")) || null; }
-    function setUser(u) { localStorage.setItem("user", JSON.stringify(u)); }
+    async function loadReviews() {  
+      reviewList.innerHTML = "";  
+      const q = query(reviewsRef, orderBy("fecha", "desc"), limit(20));  
+      const querySnap = await getDocs(q);  
+      let realReviews = [];  
+      querySnap.forEach(doc => realReviews.push(doc.data()));  
 
-    function renderReviewForm() {
-      const formDiv = document.getElementById("reviewForm");
-      const user = getUser();
-      if (!user) {
-        formDiv.innerHTML = `
-          <input id="userInput" placeholder="Usuario"/> 
-          <input id="passInput" type="password" placeholder="Contraseña"/>
-          <button id="loginBtn">Ingresar</button>`;
-        document.getElementById("loginBtn").onclick = () => {
-          const u = { name: document.getElementById("userInput").value, pass: document.getElementById("passInput").value };
-          if (!u.name || !u.pass) return alert("Completa usuario y contraseña");
-          setUser(u); renderReviewForm();
-        };
-      } else {
-        formDiv.innerHTML = `
-          <textarea id="reviewText" placeholder="Escribe tu reseña"></textarea>
-          <button id="sendReview">Enviar</button>`;
-        document.getElementById("sendReview").onclick = async () => {
-          const text = document.getElementById("reviewText").value;
-          if (!text) return;
-          await addDoc(reviewsRef, { user: user.name, text, fecha: new Date() });
-          document.getElementById("reviewText").value = "";
-        };
-      }
-    }
+      let allReviews = [...realReviews, ...fakeReviews];  
+      allReviews.sort(() => Math.random() - 0.5);  
 
-    function renderReviews(list) {
-      const ul = document.getElementById("reviewsList");
-      ul.innerHTML = "";
-      if (list.length === 0) {
-        // reseñas falsas
-        const fakeUsers = ["Carlos", "Ana", "Luis", "Marta", "Pedro"];
-        const fakeTexts = ["Muy buen servicio 🔥","Todo llegó rápido 🚀","Excelente calidad 👌","Recomendado al 100%","Me encantó 😍"];
-        for (let i=0;i<3;i++){
-          ul.innerHTML += `<li><b>${fakeUsers[Math.floor(Math.random()*fakeUsers.length)]}</b>: ${fakeTexts[Math.floor(Math.random()*fakeTexts.length)]}</li>`;
-        }
-      } else {
-        list.forEach(r => { ul.innerHTML += `<li><b>${r.user}</b>: ${r.text}</li>`; });
-      }
-    }
+      allReviews.forEach(r => {  
+        const li = document.createElement("li");  
+        li.innerHTML = `<strong>${r.name}:</strong> ${r.message}`;  
+        reviewList.appendChild(li);  
+      });  
+    }  
 
-    onSnapCol(query(reviewsRef, orderBy("fecha","desc")), snap => {
-      let reseñas = []; snap.forEach(doc => reseñas.push(doc.data())); renderReviews(reseñas);
-    });
+    reviewForm.addEventListener("submit", async (e) => {  
+      e.preventDefault();  
+      const name = document.getElementById("name").value;  
+      const message = document.getElementById("message").value;  
+      await addDoc(reviewsRef, { name, message, fecha: new Date() });  
+      reviewForm.reset();  
+      loadReviews();  
+    });  
 
-    renderReviewForm();
-
-    // abrir panel reseñas
-    document.getElementById("reviewsBubble").addEventListener("click", () => {
-      const box = document.getElementById("reviewsPanel");
-      box.style.display = box.style.display === "block" ? "none" : "block";
-    });
-
-    // mensaje animado
-    const msg = document.getElementById("reviewMessage");
-    setInterval(() => { msg.style.display="block"; setTimeout(()=> msg.style.display="none",3000); }, 5000);
-
-  </script>
-</body>
+    loadReviews();  
+  </script>  
+</body>  
 </html>
