@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>pouleSTORE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #00ffff;
+    }
+    #products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .product {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid #00ffff55;
+    }
+    .product h3 {
+      color: #00ff41;
+      margin: 5px 0;
+    }
+    .prices p {
+      color: #ccc;
+      margin: 8px 0;
+    }
+    .prices button {
+      background: #00ffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 5px;
+      color: #000;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+    .prices button:hover {
+      background: #00cccc;
+    }
+    .product iframe {
+      margin-top: 10px;
+      border-radius: 8px;
+      width: 100%;
+      height: 200px;
+    }
+    #cart {
+      margin-top: 30px;
+      padding: 15px;
+      background: #222;
+      border-radius: 12px;
+    }
+    #cart ul {
+      list-style: none;
+      padding: 0;
+    }
+    #cart li {
+      margin: 5px 0;
+    }
+    #cart li button {
+      margin-left: 10px;
+      background: red;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #currencyBtn {
+      display: block;
+      margin: 15px auto;
+      padding: 10px 20px;
+      background: #ffaa00;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #currencyBtn:hover {
+      background: #cc8800;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛒 pouleSTORE</h1>
+  <button id="currencyBtn">🌍 Convertir precios a mi moneda</button>
+  <div id="products"></div>
+
+  <div id="cart">
+    <h2>🛍️ Carrito</h2>
+    <ul id="cartItems"></ul>
+    <p><strong>Total:</strong> <span id="total">0 USD</span></p>
+  </div>
+
+  <script>
+    const products = [
+      {
+        name: "Drip Client",
+        video: "https://www.youtube.com/embed/aawpMA3HAUU",
+        options: [
+          { price: 3, duration: "1 DÍA ⏳" },
+          { price: 8, duration: "10 DÍAS 🔥" },
+          { price: 15, duration: "20 DÍAS 🚀" }
+        ]
+      },
+      {
+        name: "Cuban No Root",
+        video: "https://www.youtube.com/embed/1k-8Ue8xcMk",
+        options: [
+          { price: 8, duration: "10 DÍAS ⚔️" },
+          { price: 14, duration: "20 DÍAS 🛡️" },
+          { price: 40, duration: "PERMANENTE 👑♾️" }
+        ]
+      }
+    ];
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let currentCurrency = "USD";
+    let rate = 1;
+
+    function renderProducts() {
+      const container = document.getElementById("products");
+      container.innerHTML = "";
+      products.forEach((p, i) => {
+        let optionsHtml = "";
+        p.options.forEach((opt, j) => {
+          const convertedPrice = Math.round(opt.price * rate); // 🔥 redondeado sin decimales
+          optionsHtml += `
+            <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} 
+              <button onclick="addToCart(${i}, ${j})">Añadir</button>
+            </p>
+          `;
+        });
+        container.innerHTML += `
+          <div class="product">
+            <h3>${p.name}</h3>
+            <div class="prices">${optionsHtml}</div>
+            ${p.video ? `<iframe src="${p.video}" frameborder="0" allowfullscreen></iframe>` : ""}
+          </div>
+        `;
+      });
+    }
+
+    function renderCart() {
+      const cartItems = document.getElementById("cartItems");
+      const total = document.getElementById("total");
+      cartItems.innerHTML = "";
+      let sum = 0;
+      cart.forEach((item, i) => {
+        sum += item.price * rate;
+        cartItems.innerHTML += `<li>${item.name} - ${Math.round(item.price * rate)} ${currentCurrency} <button onclick="removeFromCart(${i})">Eliminar</button></li>`;
+      });
+      total.textContent = Math.round(sum) + " " + currentCurrency;
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function addToCart(productIndex, optionIndex) {
+      const product = products[productIndex];
+      const option = product.options[optionIndex];
+      cart.push({ name: `${product.name} (${option.duration})`, price: option.price });
+      renderCart();
+    }
+
+    function removeFromCart(i) {
+      cart.splice(i, 1);
+      renderCart();
+    }
+
+    async function convertPrices() {
+      try {
+        const locRes = await fetch("https://ipapi.co/json/");
+        const locData = await locRes.json();
+        currentCurrency = locData.currency || "USD";
+        const rateRes = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currentCurrency}`);
+        const rateData = await rateRes.json();
+        rate = rateData.rates[currentCurrency] || 1;
+        renderProducts();
+        renderCart();
+        alert(`Precios convertidos a ${currentCurrency} (${locData.country_name})`);
+      } catch (e) {
+        alert("Error al convertir moneda. Intenta de nuevo.");
+      }
+    }
+
+    document.getElementById("currencyBtn").addEventListener("click", convertPrices);
+
+    renderProducts();
+    renderCart();
+  </script>
+</body>
+</html>
