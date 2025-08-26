@@ -58,50 +58,31 @@
       height: 200px;
     }
 
-    /* 🌟 Burbuja flotante carrito */
+    /* 🛒 Carrito flotante */
     #cartBubble {
       position: fixed;
       bottom: 20px;
       right: 20px;
+      background: #ffaa00;
       width: 60px;
       height: 60px;
-      background: #00ffff;
       border-radius: 50%;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
+      font-size: 28px;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
       z-index: 1000;
     }
-    #cartBubble span {
-      font-size: 28px;
-      color: #000;
-    }
-    #cartCount {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: red;
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 50%;
-    }
-
-    /* 🌟 Caja del carrito */
     #cart {
       position: fixed;
-      bottom: 90px;
+      bottom: 100px;
       right: 20px;
-      width: 300px;
-      max-height: 400px;
-      overflow-y: auto;
-      padding: 15px;
       background: #222;
+      padding: 15px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      width: 300px;
       display: none;
       z-index: 999;
     }
@@ -120,20 +101,22 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      padding: 2px 6px;
+      font-size: 12px;
     }
-    #checkoutBtn {
-      display: block;
-      margin: 15px auto 0;
-      padding: 10px 20px;
-      background: #ffaa00;
-      color: #000;
+    #checkout {
+      background: #25d366;
       border: none;
+      padding: 8px 14px;
       border-radius: 8px;
-      font-weight: bold;
       cursor: pointer;
+      margin-top: 10px;
+      color: #000;
+      font-weight: bold;
+      width: 100%;
     }
-    #checkoutBtn:hover {
-      background: #cc8800;
+    #checkout:hover {
+      background: #1da851;
     }
     #currencyBtn {
       display: block;
@@ -156,24 +139,18 @@
   <button id="currencyBtn">🌍 Convertir precios a mi moneda</button>
   <div id="products"></div>
 
-  <!-- 🌟 Burbuja flotante carrito -->
-  <div id="cartBubble">
-    <span>🛒</span>
-    <div id="cartCount">0</div>
-  </div>
+  <!-- 🛒 Burbuja flotante -->
+  <div id="cartBubble">🛒</div>
 
-  <!-- 🌟 Caja del carrito -->
+  <!-- Carrito oculto -->
   <div id="cart">
     <h2>🛍️ Carrito</h2>
     <ul id="cartItems"></ul>
     <p><strong>Total:</strong> <span id="total">0 USD</span></p>
-    <button id="checkoutBtn">✅ Finalizar compra en WhatsApp</button>
+    <button id="checkout">Comprar por WhatsApp</button>
   </div>
 
   <script>
-    const API_KEY = "cur_live_5EczRyG7c6S0COsoFToUPFluwJvBif7qzcRiPJVx";
-    const WHATSAPP_NUMBER = "573142369516";
-
     const products = [
       {
         name: "Drip Client",
@@ -189,7 +166,8 @@
         video: "https://www.youtube.com/embed/1k-8Ue8xcMk",
         options: [
           { price: 8, duration: "10 DÍAS ⚔️" },
-          { price: 14, duration: "20 DÍAS 🛡️" },
+          { price: 13, duration: "20 DÍAS 🛡️" },
+          { price: 20, duration: "30 DÍAS 🔰" }, // ✅ Nuevo plan
           { price: 40, duration: "PERMANENTE 👑♾️" }
         ]
       }
@@ -207,7 +185,7 @@
         p.options.forEach((opt, j) => {
           const convertedPrice = Math.round(opt.price * rate);
           optionsHtml += `
-            <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration}   
+            <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} 
               <button onclick="addToCart(${i}, ${j})">Añadir</button>
             </p>
           `;
@@ -225,7 +203,6 @@
     function renderCart() {
       const cartItems = document.getElementById("cartItems");
       const total = document.getElementById("total");
-      const cartCount = document.getElementById("cartCount");
       cartItems.innerHTML = "";
       let sum = 0;
       cart.forEach((item, i) => {
@@ -233,7 +210,6 @@
         cartItems.innerHTML += `<li>${item.name} - ${Math.round(item.price * rate)} ${currentCurrency} <button onclick="removeFromCart(${i})">❌</button></li>`;
       });
       total.textContent = Math.round(sum) + " " + currentCurrency;
-      cartCount.textContent = cart.length;
       localStorage.setItem("cart", JSON.stringify(cart));
     }
 
@@ -254,44 +230,38 @@
         const locRes = await fetch("https://ipapi.co/json/");
         const locData = await locRes.json();
         currentCurrency = locData.currency || "USD";
-
-        const rateRes = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${API_KEY}&base_currency=USD&currencies=${currentCurrency}`);
+        const rateRes = await fetch(`https://open.er-api.com/v6/latest/USD`);
         const rateData = await rateRes.json();
-
-        rate = rateData.data[currentCurrency].value || 1;
-
+        rate = rateData.rates[currentCurrency] || 1;
         renderProducts();
         renderCart();
         alert(`Precios convertidos a ${currentCurrency} (${locData.country_name})`);
       } catch (e) {
-        console.error(e);
         alert("Error al convertir moneda. Intenta de nuevo.");
       }
     }
 
-    function checkout() {
+    // 🛒 Toggle burbuja
+    document.getElementById("cartBubble").addEventListener("click", () => {
+      const cartBox = document.getElementById("cart");
+      cartBox.style.display = cartBox.style.display === "block" ? "none" : "block";
+    });
+
+    // 🟢 Redirigir a WhatsApp con pedido
+    document.getElementById("checkout").addEventListener("click", () => {
       if (cart.length === 0) {
         alert("Tu carrito está vacío.");
         return;
       }
-      let message = "🛒 Hola, quiero adquirir en pouleSTORE:\n";
+      let message = "📦 Hola, quiero comprar:\n";
       cart.forEach(item => {
-        message += `- ${item.name} (${Math.round(item.price * rate)} ${currentCurrency})\n`;
+        message += `- ${item.name} (${item.price} USD)\n`;
       });
-      const total = cart.reduce((sum, item) => sum + item.price * rate, 0);
-      message += `\n💵 Total: ${Math.round(total)} ${currentCurrency}`;
-      const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      const url = `https://wa.me/573142369516?text=${encodeURIComponent(message)}`;
       window.open(url, "_blank");
-    }
+    });
 
     document.getElementById("currencyBtn").addEventListener("click", convertPrices);
-    document.getElementById("checkoutBtn").addEventListener("click", checkout);
-
-    // 🌟 Mostrar / ocultar carrito
-    document.getElementById("cartBubble").addEventListener("click", () => {
-      const cartBox = document.getElementById("cart");
-      cartBox.style.display = cartBox.style.display === "none" ? "block" : "none";
-    });
 
     renderProducts();
     renderCart();
