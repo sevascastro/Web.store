@@ -16,6 +16,12 @@
       text-align: center;
       color: #00ffff;
     }
+    #visitorCounter {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #ffaa00;
+    }
     #products {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -136,6 +142,7 @@
 </head>
 <body>
   <h1>🛒 pouleSTORE</h1>
+  <p id="visitorCounter">👥 Visitantes: cargando...</p>
   <button id="currencyBtn">🌍 Convertir precios a mi moneda</button>
   <div id="products"></div>
 
@@ -150,7 +157,51 @@
     <button id="checkout">Comprar por WhatsApp</button>
   </div>
 
-  <script>
+  <script type="module">
+    // 🔥 Importar Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+    // ⚙️ Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCl8HLbXY-QML1QXLjG1Q2KRM9LHXcNNbg",
+      authDomain: "poulestore-6867c.firebaseapp.com",
+      projectId: "poulestore-6867c",
+      storageBucket: "poulestore-6867c.firebasestorage.app",
+      messagingSenderId: "682539455505",
+      appId: "1:682539455505:web:ab19d2f1551ed130ed0db0"
+    };
+
+    // 🚀 Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 📊 Documento para el contador
+    const counterRef = doc(db, "estadisticas", "visitas");
+
+    async function addVisit() {
+      const snap = await getDoc(counterRef);
+      if (!snap.exists()) {
+        await setDoc(counterRef, { total: 1 });
+      } else {
+        await updateDoc(counterRef, { total: increment(1) });
+      }
+    }
+
+    // 🔄 Escuchar en tiempo real
+    onSnapshot(counterRef, (docSnap) => {
+      if (docSnap.exists()) {
+        document.getElementById("visitorCounter").textContent =
+          "👥 Visitantes: " + docSnap.data().total;
+      }
+    });
+
+    // ➕ Sumar visita actual
+    addVisit();
+
+    // ============================
+    // 🛒 SISTEMA DE PRODUCTOS
+    // ============================
     const products = [
       {
         name: "Drip Client",
@@ -167,7 +218,7 @@
         options: [
           { price: 8, duration: "10 DÍAS ⚔️" },
           { price: 13, duration: "20 DÍAS 🛡️" },
-          { price: 20, duration: "30 DÍAS 🔰" }, // ✅ Nuevo plan
+          { price: 20, duration: "30 DÍAS 🔰" },
           { price: 40, duration: "PERMANENTE 👑♾️" }
         ]
       }
@@ -213,17 +264,17 @@
       localStorage.setItem("cart", JSON.stringify(cart));
     }
 
-    function addToCart(productIndex, optionIndex) {
+    window.addToCart = function(productIndex, optionIndex) {
       const product = products[productIndex];
       const option = product.options[optionIndex];
       cart.push({ name: `${product.name} (${option.duration})`, price: option.price });
       renderCart();
-    }
+    };
 
-    function removeFromCart(i) {
+    window.removeFromCart = function(i) {
       cart.splice(i, 1);
       renderCart();
-    }
+    };
 
     async function convertPrices() {
       try {
@@ -241,13 +292,11 @@
       }
     }
 
-    // 🛒 Toggle burbuja
     document.getElementById("cartBubble").addEventListener("click", () => {
       const cartBox = document.getElementById("cart");
       cartBox.style.display = cartBox.style.display === "block" ? "none" : "block";
     });
 
-    // 🟢 Redirigir a WhatsApp con pedido
     document.getElementById("checkout").addEventListener("click", () => {
       if (cart.length === 0) {
         alert("Tu carrito está vacío.");
