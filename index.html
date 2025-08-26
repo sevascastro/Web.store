@@ -106,6 +106,8 @@
   </div>
 
   <script>
+    const API_KEY = "cur_live_5EczRyG7c6S0COsoFToUPFluwJvBif7qzcRiPJVx";
+
     const products = [
       {
         name: "Drip Client",
@@ -137,9 +139,9 @@
       products.forEach((p, i) => {
         let optionsHtml = "";
         p.options.forEach((opt, j) => {
-          const convertedPrice = Math.round(opt.price * rate); // 🔥 redondeado sin decimales
+          const convertedPrice = Math.round(opt.price * rate);
           optionsHtml += `
-            <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} 
+            <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration}   
               <button onclick="addToCart(${i}, ${j})">Añadir</button>
             </p>
           `;
@@ -184,13 +186,17 @@
         const locRes = await fetch("https://ipapi.co/json/");
         const locData = await locRes.json();
         currentCurrency = locData.currency || "USD";
-        const rateRes = await fetch(`https://api.exchangerate.host/latest?base=USD&symbols=${currentCurrency}`);
+
+        const rateRes = await fetch(`https://api.currencyapi.com/v3/latest?apikey=${API_KEY}&base_currency=USD&currencies=${currentCurrency}`);
         const rateData = await rateRes.json();
-        rate = rateData.rates[currentCurrency] || 1;
+
+        rate = rateData.data[currentCurrency].value || 1;
+
         renderProducts();
         renderCart();
         alert(`Precios convertidos a ${currentCurrency} (${locData.country_name})`);
       } catch (e) {
+        console.error(e);
         alert("Error al convertir moneda. Intenta de nuevo.");
       }
     }
