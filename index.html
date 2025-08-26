@@ -23,10 +23,19 @@
       color: #ffaa00;
     }
     #products {
+      margin-top: 20px;
+    }
+    .category {
+      margin-bottom: 40px;
+    }
+    .category h2 {
+      color: #ffaa00;
+      margin-bottom: 15px;
+    }
+    .productGrid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 20px;
-      margin-top: 20px;
     }
     .product {
       background: #1a1a1a;
@@ -158,11 +167,9 @@
   </div>
 
   <script type="module">
-    // 🔥 Importar Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-    // ⚙️ Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCl8HLbXY-QML1QXLjG1Q2KRM9LHXcNNbg",
       authDomain: "poulestore-6867c.firebaseapp.com",
@@ -172,11 +179,8 @@
       appId: "1:682539455505:web:ab19d2f1551ed130ed0db0"
     };
 
-    // 🚀 Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
-    // 📊 Documento para el contador
     const counterRef = doc(db, "estadisticas", "visitas");
 
     async function addVisit() {
@@ -187,40 +191,49 @@
         await updateDoc(counterRef, { total: increment(1) });
       }
     }
-
-    // 🔄 Escuchar en tiempo real
     onSnapshot(counterRef, (docSnap) => {
       if (docSnap.exists()) {
         document.getElementById("visitorCounter").textContent =
           "👥 Visitantes: " + docSnap.data().total;
       }
     });
-
-    // ➕ Sumar visita actual
     addVisit();
 
     // ============================
-    // 🛒 SISTEMA DE PRODUCTOS
+    // 🛒 CATEGORÍAS Y PRODUCTOS
     // ============================
-    const products = [
+    const categories = [
       {
-        name: "Drip Client",
-        video: "https://www.youtube.com/embed/aawpMA3HAUU",
-        options: [
-          { price: 3, duration: "1 DÍA ⏳" },
-          { price: 8, duration: "10 DÍAS 🔥" },
-          { price: 15, duration: "20 DÍAS 🚀" }
+        name: "📱 Android",
+        items: [
+          {
+            name: "Drip Client",
+            video: "https://www.youtube.com/embed/aawpMA3HAUU",
+            options: [
+              { price: 3, duration: "1 DÍA ⏳" },
+              { price: 8, duration: "10 DÍAS 🔥" },
+              { price: 15, duration: "20 DÍAS 🚀" }
+            ]
+          },
+          {
+            name: "Cuban No Root",
+            video: "https://www.youtube.com/embed/1k-8Ue8xcMk",
+            options: [
+              { price: 8, duration: "10 DÍAS ⚔️" },
+              { price: 13, duration: "20 DÍAS 🛡️" },
+              { price: 20, duration: "30 DÍAS 🔰" },
+              { price: 40, duration: "PERMANENTE 👑♾️" }
+            ]
+          }
         ]
       },
       {
-        name: "Cuban No Root",
-        video: "https://www.youtube.com/embed/1k-8Ue8xcMk",
-        options: [
-          { price: 8, duration: "10 DÍAS ⚔️" },
-          { price: 13, duration: "20 DÍAS 🛡️" },
-          { price: 20, duration: "30 DÍAS 🔰" },
-          { price: 40, duration: "PERMANENTE 👑♾️" }
-        ]
+        name: "🍏 iOS",
+        items: []
+      },
+      {
+        name: "💻 PC",
+        items: []
       }
     ];
 
@@ -231,23 +244,28 @@
     function renderProducts() {
       const container = document.getElementById("products");
       container.innerHTML = "";
-      products.forEach((p, i) => {
-        let optionsHtml = "";
-        p.options.forEach((opt, j) => {
-          const convertedPrice = Math.round(opt.price * rate);
-          optionsHtml += `
-            <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} 
-              <button onclick="addToCart(${i}, ${j})">Añadir</button>
-            </p>
+      categories.forEach(cat => {
+        let catHtml = `<div class="category"><h2>${cat.name}</h2><div class="productGrid">`;
+        cat.items.forEach((p, i) => {
+          let optionsHtml = "";
+          p.options.forEach((opt, j) => {
+            const convertedPrice = Math.round(opt.price * rate);
+            optionsHtml += `
+              <p>💵 ${convertedPrice} ${currentCurrency} = ${opt.duration} 
+                <button onclick="addToCart('${cat.name}', ${i}, ${j})">Añadir</button>
+              </p>
+            `;
+          });
+          catHtml += `
+            <div class="product">
+              <h3>${p.name}</h3>
+              <div class="prices">${optionsHtml}</div>
+              ${p.video ? `<iframe src="${p.video}" frameborder="0" allowfullscreen></iframe>` : ""}
+            </div>
           `;
         });
-        container.innerHTML += `
-          <div class="product">
-            <h3>${p.name}</h3>
-            <div class="prices">${optionsHtml}</div>
-            ${p.video ? `<iframe src="${p.video}" frameborder="0" allowfullscreen></iframe>` : ""}
-          </div>
-        `;
+        catHtml += "</div></div>";
+        container.innerHTML += catHtml;
       });
     }
 
@@ -264,8 +282,9 @@
       localStorage.setItem("cart", JSON.stringify(cart));
     }
 
-    window.addToCart = function(productIndex, optionIndex) {
-      const product = products[productIndex];
+    window.addToCart = function(categoryName, productIndex, optionIndex) {
+      const category = categories.find(c => c.name === categoryName);
+      const product = category.items[productIndex];
       const option = product.options[optionIndex];
       cart.push({ name: `${product.name} (${option.duration})`, price: option.price });
       renderCart();
